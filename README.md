@@ -17,3 +17,4 @@ go run .
 
 - Basic testing
 - Integration with users
+- Refactor

@@ -50,34 +50,31 @@ func UserSignUp(client *auth.Client) gin.HandlerFunc {
 	return fn
 }
 
-func UserLogin(client *auth.Client) gin.HandlerFunc {
-	fn := func(c *gin.Context) {
-		var user User
-		if err := c.BindJSON(&user); err != nil {
-			print(err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Incorrect details for user login"})
-			return
-		}
-		m := userLogin{user.Email, user.Password, true}
-		posturl := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDIuhP0PN2JyRRAdqegXBzm_YO-HKPgjaQ"
-		body, err := json.Marshal(m)
-		r, err := http.NewRequest("POST", posturl, bytes.NewBuffer(body))
-		if err != nil {
-			panic(err)
-		}
-		r.Header.Add("Content-Type", "application/json")
-		client := &http.Client{}
-		res, err := client.Do(r)
-		if err != nil || res.StatusCode != 200 {
-			panic(err)
-		}
-		defer res.Body.Close()
-		post := &FireBaseResponse{}
-		derr := json.NewDecoder(res.Body).Decode(post)
-		if derr != nil {
-			panic(derr)
-		}
-		c.JSON(http.StatusOK, gin.H{"id": post.IdToken})
+func UserLogin(c *gin.Context) {
+	var user User
+	if err := c.BindJSON(&user); err != nil {
+		print(err.Error())
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Incorrect details for user login"})
+		return
 	}
-	return fn
+	m := userLogin{user.Email, user.Password, true}
+	posturl := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDIuhP0PN2JyRRAdqegXBzm_YO-HKPgjaQ"
+	body, err := json.Marshal(m)
+	r, err := http.NewRequest("POST", posturl, bytes.NewBuffer(body))
+	if err != nil {
+		panic(err)
+	}
+	r.Header.Add("Content-Type", "application/json")
+	client := &http.Client{}
+	res, err := client.Do(r)
+	if err != nil || res.StatusCode != 200 {
+		panic(err)
+	}
+	defer res.Body.Close()
+	post := &FireBaseResponse{}
+	derr := json.NewDecoder(res.Body).Decode(post)
+	if derr != nil {
+		panic(derr)
+	}
+	c.JSON(http.StatusOK, gin.H{"id": post.IdToken})
 }

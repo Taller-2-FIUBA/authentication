@@ -21,6 +21,6 @@ func main() {
 	router.GET("/auth/credentials", controllers.GetToken)
 	router.GET("/auth/token", controllers.Encode)
 	router.POST("/auth", controllers.UserSignUp(client))
-	router.POST("/auth/login", controllers.UserLogin(client))
+	router.POST("/auth/login", controllers.UserLogin)
 	router.Run("localhost:8082")
 }

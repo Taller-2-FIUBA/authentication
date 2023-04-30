@@ -7,10 +7,6 @@ import (
 	"strings"
 )
 
-type header struct {
-	Authorization string `header:"Authorization" binding:"required"`
-}
-
 var (
 	key []byte
 	t   *jwt.Token
@@ -23,9 +19,14 @@ type UserClaims struct {
 	jwt.Claims
 }
 
-func Encode(c *gin.Context) {
+func GetToken(c *gin.Context) {
+	print(c.Request)
 	userId := c.Query("id")
 	userRole := c.Query("role")
+	if userId == "" || userRole == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Incorrect details"})
+		return
+	}
 	key = []byte("secret")
 	t = jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
@@ -36,7 +37,7 @@ func Encode(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": s})
 }
 
-func GetToken(c *gin.Context) {
+func GetCredentials(c *gin.Context) {
 	auth := c.Request.Header.Get("Authorization")
 	if auth == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Authorization Header Not Found"})

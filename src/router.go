@@ -1,15 +1,15 @@
 package main
 
 import (
-	"authentication/controllers"
+	"authentication/src/controllers"
 	"context"
-	"firebase.google.com/go/v4"
+	firebase "firebase.google.com/go/v4"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/option"
 	"log"
 )
 
-func main() {
+func SetupRouter() *gin.Engine {
 	ctx := context.Background()
 	opt := option.WithCredentialsFile("fiufit-backend-keys.json")
 	app, err := firebase.NewApp(ctx, nil, opt)
@@ -18,9 +18,9 @@ func main() {
 	}
 	client, err := app.Auth(ctx)
 	router := gin.Default()
-	router.GET("/auth/credentials", controllers.GetToken)
-	router.GET("/auth/token", controllers.Encode)
+	router.GET("/auth/credentials", controllers.GetCredentials)
+	router.GET("/auth/token", controllers.GetToken)
 	router.POST("/auth", controllers.UserSignUp(client))
 	router.POST("/auth/login", controllers.UserLogin)
-	router.Run("localhost:8082")
+	return router
 }

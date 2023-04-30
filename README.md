@@ -1,10 +1,7 @@
 # authentication
 
 Service to handle anything related to JWT and Firebase.
-
-Mostly designed to be accessed from backend.
-
-Nowhere near ready
+To be accessed from backend.
 
 # Launching
 
@@ -15,6 +12,6 @@ go run .
 
 ## TODO
 
-- Basic testing
 - Integration with users
+- CI
 - Refactor

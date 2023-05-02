@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"os"
 )
 
@@ -10,6 +11,7 @@ func main() {
 		print("No port provided, exiting")
 		return
 	}
+	gin.SetMode(gin.ReleaseMode)
 	router := SetupRouter()
 	err := router.Run(":" + arg[0])
 	if err != nil {

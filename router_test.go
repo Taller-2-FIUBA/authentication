@@ -34,11 +34,6 @@ func TestCantGetTokenWithIncorrectDetails(t *testing.T) {
 func TestCanGetTokenWithProperDetails(t *testing.T) {
 	router := SetupRouter()
 	w := httptest.NewRecorder()
-	//json := `{
-	//"role": "user",
-	//"id": "pepe"
-	//}`
-	//body := strings.NewReader(string(json))
 	req, _ := http.NewRequest("GET", "/auth/token?role=user&id=pepe", nil)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)

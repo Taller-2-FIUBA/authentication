@@ -23,7 +23,7 @@ spec:
         image: marianocinalli/auth:v0.0.1
         imagePullPolicy: Always
         ports:
-          - containerPort: 8002
+          - containerPort: 80
             name: http-auth
         resources:
           limits:

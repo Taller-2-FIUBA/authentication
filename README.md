@@ -24,10 +24,10 @@ go test
 
 ```
 docker build --tag IMAGE_NAME .
-docker run --rm -p 8082:8082 --name CONTAINER_NAME IMAGE_NAME
+docker run --rm -p 8003:80 --name CONTAINER_NAME IMAGE_NAME
 ```
 Where `IMAGE_NAME` is the name chosen in the previous step and
 `CONTAINER_NAME` is a name to identify the container running the app  
-Notice `--rm` tells docker to remove the container after it stops, and `-p 8082:8082` maps 
-the port 8082 in the container to the port 8082 in the host.  
+Notice `--rm` tells docker to remove the container after it stops, and `-p 8003:80` maps 
+the port 80 in the container to the port 8003 in the host.  
 The specific port can be changed in the Dockerfile.

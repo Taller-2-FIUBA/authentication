@@ -1,5 +1,7 @@
 # authentication
 
+[![codecov](https://codecov.io/gh/Taller-2-FIUBA/authentication/branch/main/graph/badge.svg?token=MM8e5db9JF)](https://codecov.io/gh/Taller-2-FIUBA/authentication)
+
 Service to handle JWT and Firebase services.
 To be accessed from backend.
 

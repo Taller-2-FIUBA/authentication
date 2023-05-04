@@ -24,8 +24,7 @@ func GetToken(c *gin.Context) {
 	userId := c.Query("id")
 	userRole := c.Query("role")
 	if userId == "" || userRole == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Incorrect details"})
-		return
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Incorrect details"})
 	}
 	key = []byte("secret")
 	t = jwt.NewWithClaims(jwt.SigningMethodHS256,
@@ -40,8 +39,7 @@ func GetToken(c *gin.Context) {
 func GetCredentials(c *gin.Context) {
 	auth := c.Request.Header.Get("Authorization")
 	if auth == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Authorization Header Not Found"})
-		return
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Authorization Header Not Found"})
 	}
 	splitToken := strings.Split(auth, "Bearer ")
 	auth = splitToken[1]
@@ -50,8 +48,7 @@ func GetCredentials(c *gin.Context) {
 		return []byte("secret"), nil
 	})
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Token contains incorrect data"})
-		return
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Token contains incorrect data"})
 	}
 	c.JSON(http.StatusOK, gin.H{"data": claims})
 }

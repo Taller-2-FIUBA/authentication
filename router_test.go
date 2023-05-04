@@ -20,7 +20,7 @@ func TestCantGetTokenWithNoDetails(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/auth/token", nil)
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 401, w.Code)
+	assert.Equal(t, 403, w.Code)
 }
 
 func TestCantGetTokenWithIncorrectDetails(t *testing.T) {
@@ -28,7 +28,7 @@ func TestCantGetTokenWithIncorrectDetails(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/auth/token?wrong=pepe", nil)
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 401, w.Code)
+	assert.Equal(t, 403, w.Code)
 }
 
 func TestCanGetTokenWithProperDetails(t *testing.T) {
@@ -45,7 +45,7 @@ func TestCantGetCredentialsWithInvalidToken(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/auth/credentials", nil)
 	router.ServeHTTP(w, req)
-	assert.Equal(t, 401, w.Code)
+	assert.Equal(t, 403, w.Code)
 }
 
 func TestCanGetCredentialsWithValidToken(t *testing.T) {

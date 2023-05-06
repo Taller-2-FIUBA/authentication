@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"authentication/config"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -33,7 +34,6 @@ func UserSignUp(client *auth.Client) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		var user User
 		if err := c.BindJSON(&user); err != nil {
-			print(err.Error())
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Incorrect details for user creation"})
 			return
 		}
@@ -58,17 +58,19 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 	m := userLogin{user.Email, user.Password, true}
-	posturl := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDIuhP0PN2JyRRAdqegXBzm_YO-HKPgjaQ"
+	posturl := "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + config.Cfg.Firebase.Apikey
 	body, err := json.Marshal(m)
 	r, err := http.NewRequest("POST", posturl, bytes.NewBuffer(body))
 	if err != nil {
-		panic(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Error logging in"})
+		return
 	}
 	r.Header.Add("Content-Type", "application/json")
 	client := &http.Client{}
 	res, err := client.Do(r)
 	if err != nil || res.StatusCode != 200 {
-		panic(err)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Error logging in"})
+		return
 	}
 	defer res.Body.Close()
 	post := &FireBaseResponse{}
@@ -77,4 +79,18 @@ func UserLogin(c *gin.Context) {
 		panic(derr)
 	}
 	c.JSON(http.StatusOK, gin.H{"id": post.IdToken})
+}
+
+func UserTokenLogin(c *gin.Context) {
+	token := ExtractToken(c)
+	if token != "" {
+		if InvalidToken(c.Request.Header.Get("Bearer " + token)) {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Expired token"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"token": token})
+	} else {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "No token"})
+		return
+	}
 }

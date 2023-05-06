@@ -1,6 +1,7 @@
 package main
 
 import (
+	"authentication/config"
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -49,6 +50,7 @@ func TestCantGetCredentialsWithInvalidToken(t *testing.T) {
 }
 
 func TestCanGetCredentialsWithValidToken(t *testing.T) {
+	config.Init()
 	router := SetupRouter()
 	w := httptest.NewRecorder()
 	req1, err := http.NewRequest("GET", "/auth/token?role=user&id=pepe", nil)

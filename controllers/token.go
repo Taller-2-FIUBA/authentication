@@ -68,9 +68,8 @@ func GetCredentials(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Authorization Header Not Found"})
 		return
 	}
-	auth := c.Request.Header.Get("Authorization")
 	claims := UserClaims{}
-	parsedToken, err := jwt.ParseWithClaims(auth, &claims, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
 	if !parsedToken.Valid {

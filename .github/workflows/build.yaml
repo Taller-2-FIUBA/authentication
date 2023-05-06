@@ -27,7 +27,10 @@ jobs:
     - name: Test
       env:
         GOPROXY: "https://proxy.golang.org"
-      run: go test -v .
+      run: go test -race -coverprofile=coverage.out -covermode=atomic -v
 
     - name: Format
       run: gofmt -s -w .
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3

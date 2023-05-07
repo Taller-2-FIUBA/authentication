@@ -42,15 +42,15 @@ func GetToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": s})
 }
 
-func InvalidToken(auth string) bool {
+func ValidToken(auth string) bool {
 	claims := UserClaims{}
 	parsedToken, _ := jwt.ParseWithClaims(auth, &claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
 	if !parsedToken.Valid {
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
 func ExtractToken(c *gin.Context) string {

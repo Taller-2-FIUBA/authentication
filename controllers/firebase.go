@@ -78,14 +78,14 @@ func UserLogin(c *gin.Context) {
 	if derr != nil {
 		panic(derr)
 	}
-	c.JSON(http.StatusOK, gin.H{"id": post.IdToken})
+	c.JSON(http.StatusOK, gin.H{"id": post.LocalId})
 }
 
 func UserTokenLogin(c *gin.Context) {
 	token := ExtractToken(c)
 	if token != "" {
-		if InvalidToken(c.Request.Header.Get("Bearer " + token)) {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Expired token"})
+		if !ValidToken(token) {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Expired or invalid token"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"token": token})

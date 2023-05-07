@@ -2,13 +2,14 @@ package main
 
 import (
 	"authentication/config"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	if config.Init() == false {
 		return
 	}
-	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	router := SetupRouter()
 	err := router.Run(":" + config.Cfg.Server.Port)
 	if err != nil {

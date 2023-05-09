@@ -7,7 +7,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"firebase.google.com/go/v4/auth"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	gomail "gopkg.in/mail.v2"
 	"net/http"
@@ -33,7 +32,7 @@ type FireBaseResponse struct {
 	Registered   bool   `json:"registered"`
 }
 
-func sendCustomEmail(email string, username string, link string) {
+func sendCustomEmail(c *gin.Context, email string, username string, link string) {
 	m := gomail.NewMessage()
 	m.SetHeader("From", "grupocincofiuba.t2@gmail.com")
 	m.SetHeader("To", email)
@@ -44,8 +43,8 @@ func sendCustomEmail(email string, username string, link string) {
 		"grupocincofiuba.t2@gmail.com", "hmqfvwlmszqsfhen\n")
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	if err := d.DialAndSend(m); err != nil {
-		fmt.Println(err)
-		panic(err)
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Unable to send email"})
+		return
 	}
 	return
 }
@@ -59,7 +58,7 @@ func PasswordRecovery(client *auth.Client) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Error sending mail"})
 			return
 		}
-		sendCustomEmail(email, username, link)
+		sendCustomEmail(c, email, username, link)
 	}
 	return fn
 }

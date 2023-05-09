@@ -8,6 +8,8 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/stretchr/testify v1.8.1
 	google.golang.org/api v0.119.0
+	gopkg.in/mail.v2 v2.3.1
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -60,5 +62,5 @@ require (
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.54.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )

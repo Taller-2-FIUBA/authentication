@@ -9,4 +9,4 @@ COPY . ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /auth
 
-CMD ["/auth", "8002"]
+CMD ["/auth"]

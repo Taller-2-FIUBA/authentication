@@ -1,19 +1,17 @@
 package main
 
 import (
+	"authentication/config"
 	"github.com/gin-gonic/gin"
-	"os"
 )
 
 func main() {
-	arg := os.Args[1:]
-	if len(arg) < 1 {
-		print("No port provided, exiting")
+	if config.Init() == false {
 		return
 	}
 	gin.SetMode(gin.ReleaseMode)
 	router := SetupRouter()
-	err := router.Run(":" + arg[0])
+	err := router.Run(":" + config.Cfg.Server.Port)
 	if err != nil {
 		print("Error connecting, exiting")
 	}

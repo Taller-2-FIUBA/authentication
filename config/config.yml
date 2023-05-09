@@ -1,0 +1,11 @@
+# Server configuration
+server:
+  port: "8002"
+
+# Token configuration
+token:
+  expiration: 24
+
+#Firebase configuration
+firebase:
+  apikey: "AIzaSyDIuhP0PN2JyRRAdqegXBzm_YO-HKPgjaQ"

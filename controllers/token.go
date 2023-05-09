@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"authentication/config"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var (
@@ -16,39 +18,67 @@ var (
 type UserClaims struct {
 	Role string `json:"role"`
 	ID   string `json:"id"`
-	jwt.Claims
+	jwt.RegisteredClaims
 }
 
 func GetToken(c *gin.Context) {
-	print(c.Request)
 	userId := c.Query("id")
 	userRole := c.Query("role")
 	if userId == "" || userRole == "" {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Incorrect details"})
+		return
 	}
 	key = []byte("secret")
-	t = jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"id":   userId,
-			"role": userRole,
-		})
+	claims := UserClaims{
+		userRole,
+		userId,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Cfg.Token.Expiration) * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+	t = jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	s, _ = t.SignedString(key)
 	c.JSON(http.StatusOK, gin.H{"data": s})
 }
 
-func GetCredentials(c *gin.Context) {
-	auth := c.Request.Header.Get("Authorization")
-	if auth == "" {
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Authorization Header Not Found"})
-	}
-	splitToken := strings.Split(auth, "Bearer ")
-	auth = splitToken[1]
-	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(auth, claims, func(token *jwt.Token) (interface{}, error) {
+func ValidToken(auth string) bool {
+	claims := UserClaims{}
+	parsedToken, _ := jwt.ParseWithClaims(auth, &claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte("secret"), nil
 	})
+	if !parsedToken.Valid {
+		return false
+	}
+	return true
+}
+
+func ExtractToken(c *gin.Context) string {
+	auth := c.Request.Header.Get("Authorization")
+	if auth == "" {
+		return ""
+	}
+	splitToken := strings.Split(auth, "Bearer ")
+	return splitToken[1]
+}
+
+func GetCredentials(c *gin.Context) {
+	token := ExtractToken(c)
+	if token == "" {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Authorization Header Not Found"})
+		return
+	}
+	claims := UserClaims{}
+	parsedToken, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+	if !parsedToken.Valid {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Invalid token"})
+		return
+	}
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Token contains incorrect data"})
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": claims})
 }

@@ -4,9 +4,12 @@ import (
 	"authentication/config"
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"firebase.google.com/go/v4/auth"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	gomail "gopkg.in/mail.v2"
 	"net/http"
 )
 
@@ -28,6 +31,37 @@ type FireBaseResponse struct {
 	ExpiresIn    string `json:"expiresIn"`
 	LocalId      string `json:"localId"`
 	Registered   bool   `json:"registered"`
+}
+
+func sendCustomEmail(email string, username string, link string) {
+	m := gomail.NewMessage()
+	m.SetHeader("From", "grupocincofiuba.t2@gmail.com")
+	m.SetHeader("To", email)
+	m.SetHeader("Subject", "Recuperacion pass FiuFit")
+	m.SetBody("text/html", "Link de recuperación de contraseña para "+username+
+		"<br>"+"<a href="+link+">LINK</a>")
+	d := gomail.NewDialer("smtp.gmail.com", 587,
+		"grupocincofiuba.t2@gmail.com", "hmqfvwlmszqsfhen\n")
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	if err := d.DialAndSend(m); err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+	return
+}
+
+func PasswordRecovery(client *auth.Client) gin.HandlerFunc {
+	fn := func(c *gin.Context) {
+		email := c.Query("email")
+		username := c.Query("username")
+		link, err := client.PasswordResetLinkWithSettings(c, email, nil)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Error sending mail"})
+			return
+		}
+		sendCustomEmail(email, username, link)
+	}
+	return fn
 }
 
 func UserSignUp(client *auth.Client) gin.HandlerFunc {

@@ -53,17 +53,20 @@ func ValidToken(auth string) bool {
 	return true
 }
 
-func ExtractToken(c *gin.Context) string {
+func ExtractToken(c *gin.Context, bearer bool) string {
 	auth := c.Request.Header.Get("Authorization")
 	if auth == "" {
 		return ""
 	}
-	splitToken := strings.Split(auth, "Bearer ")
-	return splitToken[1]
+	if bearer {
+		splitToken := strings.Split(auth, "Bearer ")
+		return splitToken[1]
+	}
+	return auth
 }
 
 func GetCredentials(c *gin.Context) {
-	token := ExtractToken(c)
+	token := ExtractToken(c, true)
 	if token == "" {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Authorization Header Not Found"})
 		return

@@ -32,6 +32,17 @@ type FireBaseResponse struct {
 	Registered   bool   `json:"registered"`
 }
 
+type GoogleResponse struct {
+	IssuedTo      string `json:"issued_to"`
+	Audience      string `json:"audience"`
+	UserID        string `json:"user_id"`
+	Scope         string `json:"scope"`
+	ExpiresIn     int32  `json:"expires_in"`
+	Email         string `json:"email"`
+	VerifiedEmail bool   `json:"verified_email"`
+	AccessType    string `json:"access_type"`
+}
+
 func sendCustomEmail(c *gin.Context, email string, username string, link string) {
 	m := gomail.NewMessage()
 	m.SetHeader("From", "grupocincofiuba.t2@gmail.com")
@@ -114,8 +125,32 @@ func UserLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"id": post.LocalId})
 }
 
+func UserVerifyIDPLogin(c *gin.Context) {
+	token := ExtractToken(c, false)
+	if token != "" {
+		url := "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + token
+		r, err := http.Get(url)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Invalid IDP Token"})
+			return
+		}
+		defer r.Body.Close()
+		creds := &GoogleResponse{}
+		derr := json.NewDecoder(r.Body).Decode(creds)
+		if derr != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Error decoding credentials"})
+			return
+		}
+		if !creds.VerifiedEmail || creds.ExpiresIn == 0 {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Invalid IDP Token"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{})
+	}
+}
+
 func UserTokenLogin(c *gin.Context) {
-	token := ExtractToken(c)
+	token := ExtractToken(c, true)
 	if token != "" {
 		if !ValidToken(token) {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Expired or invalid token"})

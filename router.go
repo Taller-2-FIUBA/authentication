@@ -23,6 +23,7 @@ func SetupRouter() *gin.Engine {
 	router.POST("/auth", controllers.UserSignUp(client))
 	router.POST("/auth/tokenLogin", controllers.UserTokenLogin)
 	router.POST("/auth/login", controllers.UserLogin)
+	router.POST("/auth/loginIDP", controllers.UserVerifyIDPLogin)
 	router.POST("/auth/recovery", controllers.PasswordRecovery(client))
 	return router
 }

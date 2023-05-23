@@ -5,16 +5,24 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	b64 "encoding/base64"
 	"encoding/json"
 	"firebase.google.com/go/v4/auth"
+	storage2 "firebase.google.com/go/v4/storage"
 	"github.com/gin-gonic/gin"
 	gomail "gopkg.in/mail.v2"
+	"io"
 	"net/http"
+	"time"
 )
 
 type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type UploadedImage struct {
+	Image string `json:"image"`
 }
 
 type userLogin struct {
@@ -97,7 +105,6 @@ func UserSignUp(client *auth.Client) gin.HandlerFunc {
 func UserLogin(c *gin.Context) {
 	var user User
 	if err := c.BindJSON(&user); err != nil {
-		print(err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Incorrect details for user login"})
 		return
 	}
@@ -161,4 +168,50 @@ func UserTokenLogin(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "No token"})
 		return
 	}
+}
+
+func FileUpload(storage *storage2.Client) gin.HandlerFunc {
+	fn := func(c *gin.Context) {
+		var image UploadedImage
+		if err := c.BindJSON(&image); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Incorrect image encoding"})
+			return
+		}
+		decodedImage, _ := b64.StdEncoding.DecodeString(image.Image)
+		fileName := c.Param("name")
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*50)
+		defer cancel()
+		bucket, _ := storage.DefaultBucket()
+		object := bucket.Object(fileName)
+		wc := object.NewWriter(ctx)
+		defer wc.Close()
+		if _, err := io.Copy(wc, bytes.NewReader(decodedImage)); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Failed to upload image"})
+			return
+		}
+	}
+	return fn
+}
+
+func FileDownload(storage *storage2.Client) gin.HandlerFunc {
+	fn := func(c *gin.Context) {
+		fileName := c.Param("name")
+		_, cancel := context.WithTimeout(context.Background(), time.Second*50)
+		defer cancel()
+		bucket, _ := storage.DefaultBucket()
+		object := bucket.Object(fileName)
+		rc, err := object.NewReader(context.Background())
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Couldn't read object"})
+			return
+		}
+		defer rc.Close()
+		data, err := io.ReadAll(rc)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "No image with that name"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"image": data})
+	}
+	return fn
 }

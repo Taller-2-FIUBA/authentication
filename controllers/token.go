@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -17,12 +18,17 @@ var (
 
 type UserClaims struct {
 	Role string `json:"role"`
-	ID   string `json:"id"`
+	ID   int    `json:"id"`
 	jwt.RegisteredClaims
 }
 
 func GetToken(c *gin.Context) {
 	userId := c.Query("id")
+	numericUserId, err := strconv.Atoi(userId)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Error converting userID"})
+		return
+	}
 	userRole := c.Query("role")
 	if userId == "" || userRole == "" {
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"Message": "Incorrect details"})
@@ -31,7 +37,7 @@ func GetToken(c *gin.Context) {
 	key = []byte("secret")
 	claims := UserClaims{
 		userRole,
-		userId,
+		numericUserId,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Cfg.Token.Expiration) * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

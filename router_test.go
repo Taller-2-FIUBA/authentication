@@ -11,7 +11,7 @@ import (
 
 type Response struct {
 	Data struct {
-		ID   string `json:"id"`
+		ID   int    `json:"id"`
 		Role string `json:"role"`
 	} `json:"data"`
 }
@@ -35,7 +35,7 @@ func TestCantGetTokenWithIncorrectDetails(t *testing.T) {
 func TestCanGetTokenWithProperDetails(t *testing.T) {
 	router := SetupRouter()
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/auth/token?role=user&id=pepe", nil)
+	req, _ := http.NewRequest("GET", "/auth/token?role=user&id=1", nil)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	assert.NotEqual(t, "", w.Body.String())
@@ -53,7 +53,7 @@ func TestCanGetCredentialsWithValidToken(t *testing.T) {
 	config.Init()
 	router := SetupRouter()
 	w := httptest.NewRecorder()
-	req1, err := http.NewRequest("GET", "/auth/token?role=user&id=pepe", nil)
+	req1, err := http.NewRequest("GET", "/auth/token?role=user&id=1", nil)
 	router.ServeHTTP(w, req1)
 	var j map[string]interface{}
 	err = json.NewDecoder(w.Body).Decode(&j)
@@ -66,6 +66,6 @@ func TestCanGetCredentialsWithValidToken(t *testing.T) {
 	var result Response
 	json.Unmarshal([]byte(w.Body.String()), &result)
 	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "pepe", result.Data.ID)
+	assert.Equal(t, 1, result.Data.ID)
 	assert.Equal(t, "user", result.Data.Role)
 }

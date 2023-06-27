@@ -29,9 +29,5 @@ func Init(filename string) bool {
 	defer f.Close()
 	decoder := yaml.NewDecoder(f)
 	_ = decoder.Decode(&Cfg)
-	if err != nil {
-		fmt.Println("Error decoding config file")
-		return false
-	}
 	return true
 }

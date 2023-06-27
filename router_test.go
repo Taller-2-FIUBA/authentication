@@ -1,7 +1,6 @@
 package main
 
 import (
-	"authentication/config"
 	"bytes"
 	"encoding/json"
 	"github.com/golang-jwt/jwt/v5"
@@ -17,17 +16,6 @@ type Response struct {
 		ID   int    `json:"id"`
 		Role string `json:"role"`
 	} `json:"data"`
-}
-
-type UserClaims struct {
-	Role string `json:"role"`
-	ID   int    `json:"id"`
-	jwt.RegisteredClaims
-}
-
-type User struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
 }
 
 type Image struct {
@@ -68,7 +56,7 @@ func TestCantGetCredentialsWithInvalidToken(t *testing.T) {
 }
 
 func TestCanGetCredentialsWithValidToken(t *testing.T) {
-	config.Init("config.yml")
+	Init("config.yml")
 	router := SetupRouter()
 	w := httptest.NewRecorder()
 	req1, err := http.NewRequest("GET", "/auth/token?role=user&id=1", nil)
@@ -267,9 +255,9 @@ func TestCanUploadAndDownloadImage(t *testing.T) {
 }
 
 func TestCantOpenNonExistentFile(t *testing.T) {
-	assert.Equal(t, config.Init("fake.yml"), false)
+	assert.Equal(t, Init("fake.yml"), false)
 }
 
 func TestCanOpenPresentFile(t *testing.T) {
-	assert.Equal(t, config.Init("config.yml"), true)
+	assert.Equal(t, Init("config.yml"), true)
 }

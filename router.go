@@ -1,7 +1,6 @@
 package main
 
 import (
-	"authentication/controllers"
 	"context"
 	firebase "firebase.google.com/go/v4"
 	"github.com/gin-gonic/gin"
@@ -21,14 +20,14 @@ func SetupRouter() *gin.Engine {
 	client, err := app.Auth(ctx)
 	storage, err := app.Storage(ctx)
 	router := gin.Default()
-	router.GET("/auth/credentials", controllers.GetCredentials)
-	router.GET("/auth/token", controllers.GetToken)
-	router.GET("auth/storage/:name", controllers.FileDownload(storage))
-	router.POST("/auth", controllers.UserSignUp(client))
-	router.POST("auth/storage/:name", controllers.FileUpload(storage))
-	router.POST("/auth/tokenLogin", controllers.UserTokenLogin)
-	router.POST("/auth/login", controllers.UserLogin)
-	router.POST("/auth/loginIDP", controllers.UserVerifyIDPLogin)
-	router.POST("/auth/recovery", controllers.PasswordRecovery(client))
+	router.GET("/auth/credentials", GetCredentials)
+	router.GET("/auth/token", GetToken)
+	router.GET("auth/storage/:name", FileDownload(storage))
+	router.POST("/auth", UserSignUp(client))
+	router.POST("auth/storage/:name", FileUpload(storage))
+	router.POST("/auth/tokenLogin", UserTokenLogin)
+	router.POST("/auth/login", UserLogin)
+	router.POST("/auth/loginIDP", UserVerifyIDPLogin)
+	router.POST("/auth/recovery", PasswordRecovery(client))
 	return router
 }

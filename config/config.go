@@ -20,8 +20,8 @@ type Config struct {
 	} `yaml:"firebase"`
 }
 
-func Init() bool {
-	f, err := os.Open("config/config.yml")
+func Init(filename string) bool {
+	f, err := os.Open("config/" + filename)
 	if err != nil {
 		fmt.Println("Error opening config file")
 		return false

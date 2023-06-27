@@ -72,6 +72,7 @@ func PasswordRecovery(client *auth.Client) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		email := c.Query("email")
 		username := c.Query("username")
+		println(email, username)
 		link, err := client.PasswordResetLinkWithSettings(c, email, nil)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"Message": "Error sending mail"})
@@ -138,14 +139,14 @@ func UserVerifyIDPLogin(c *gin.Context) {
 		url := "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + token
 		r, err := http.Get(url)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Invalid IDP Token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Error communicating with Google"})
 			return
 		}
 		defer r.Body.Close()
 		creds := &GoogleResponse{}
 		derr := json.NewDecoder(r.Body).Decode(creds)
 		if derr != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Error decoding credentials"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Invalid IDP Token"})
 			return
 		}
 		if !creds.VerifiedEmail || creds.ExpiresIn == 0 {
@@ -154,6 +155,8 @@ func UserVerifyIDPLogin(c *gin.Context) {
 		}
 		c.JSON(http.StatusOK, gin.H{})
 	}
+	c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "No token"})
+	return
 }
 
 func UserTokenLogin(c *gin.Context) {
@@ -202,13 +205,13 @@ func FileDownload(storage *storage2.Client) gin.HandlerFunc {
 		object := bucket.Object(fileName)
 		rc, err := object.NewReader(context.Background())
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Couldn't read object"})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "No image with that name"})
 			return
 		}
 		defer rc.Close()
 		data, err := io.ReadAll(rc)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "No image with that name"})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"Message": "Couldn't read object"})
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"image": data})

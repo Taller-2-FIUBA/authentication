@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	if config.Init() == false {
+	if config.Init("config.yml") == false {
 		return
 	}
 	gin.SetMode(gin.ReleaseMode)

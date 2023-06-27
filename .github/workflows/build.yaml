@@ -27,7 +27,7 @@ jobs:
     - name: Test
       env:
         GOPROXY: "https://proxy.golang.org"
-      run: go test ./... -race -coverprofile=coverage.out -covermode=atomic -v
+      run: go test -race -coverprofile=coverage.out -covermode=atomic -v
 
     - name: Format
       run: gofmt -s -w .
